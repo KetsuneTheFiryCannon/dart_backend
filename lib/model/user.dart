@@ -10,7 +10,14 @@ class _User {
   String? userName;
   @Column(unique: true, indexed: true)
   String? email;
+  @Serialize(input: true, output: false)
   String? password;
+
+  @Column(omitByDefault: true)
+  String? hashPassword;
+  @Column(omitByDefault: true)
+  String? salt;
+
   @Column(nullable: true)
   String? accessToken;
   @Column(nullable: true)
