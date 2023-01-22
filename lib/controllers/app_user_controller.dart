@@ -52,6 +52,7 @@ class AppUserController extends ResourceController {
     }
   }
 
+  @Operation.put()
   Future<Response> updatePassword(
       @Bind.header(HttpHeaders.authorizationHeader) String header,
       @Bind.query('newPassword') String newPassword,
