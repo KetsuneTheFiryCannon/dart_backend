@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:conduit/conduit.dart';
 import 'package:dart_backend/model/user.dart';
+import 'package:dart_backend/response.dart';
 import 'package:dart_backend/utils/app_response.dart';
 import 'package:dart_backend/utils/app_utils.dart';
 
@@ -48,6 +49,38 @@ class AppUserController extends ResourceController {
           body: found.backing.contents, message: 'Успешное обновление профиля');
     } catch (e) {
       return AppResponse.serverError(e, message: 'Ошибка обновления данных');
+    }
+  }
+
+  Future<Response> updatePassword(
+      @Bind.header(HttpHeaders.authorizationHeader) String header,
+      @Bind.query('newPassword') String newPassword,
+      @Bind.query('oldPassword') String oldPassword) async {
+    try {
+      final id = AppUtils.getIdFromHeader(header);
+      final qFindUser = Query<User>(managedContext)
+        ..where((x) => x.id).equalTo(id)
+        ..returningProperties((x) => [x.salt, x.hashPassword]);
+      final found = await qFindUser.fetchOne();
+
+      final oldHashPassword =
+          generatePasswordHash(oldPassword, found!.salt ?? '');
+      if (oldHashPassword != found.hashPassword) {
+        return Response.badRequest(
+            body: ModelResponse(message: 'Неверный старый пароль'));
+      }
+
+      final newHashPassword =
+          generatePasswordHash(newPassword, found.salt ?? '');
+      // запрос на обновление пароля
+      final qUpdatePassword = Query<User>(managedContext)
+        ..where((x) => x.id).equalTo(id)
+        ..values.hashPassword = newHashPassword;
+      await qUpdatePassword.updateOne();
+
+      return AppResponse.ok(body: 'Пароль успешно обновлен');
+    } catch (e) {
+      return AppResponse.serverError(e, message: 'Ошибка обновления пароля');
     }
   }
 }
