@@ -101,7 +101,7 @@ class AppAuthController extends ResourceController {
       _updateTokens(id, managedContext);
       return Response.ok(
         ModelResponse(data: user.backing.contents, message: 'Токен успешно обновлен')
-      )
+      );
     } on QueryException catch (e) {
       return Response.serverError(body: ModelResponse(message: e.message));
     }
