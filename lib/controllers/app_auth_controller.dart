@@ -45,7 +45,7 @@ class AppAuthController extends ResourceController {
     }
   }
 
-  @Operation.post()
+  @Operation.put()
   Future<Response> signUp(@Bind.body() User user) async {
     if (user.password == null || user.userName == null || user.email == null) {
       return Response.badRequest(
