@@ -1,6 +1,5 @@
-username: "postgres1"
+username: "postgres"
 password: "L@7LTiM+`8kO~$WY"
 host: "localhost"
 port: 5432
 databaseName: "dart-api"
-DB_USERNAME: "pg"
