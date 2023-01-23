@@ -5,8 +5,8 @@ import 'package:conduit/conduit.dart';
 import 'package:dart_backend/controllers/app_auth_controller.dart';
 import 'package:dart_backend/controllers/app_token_controller.dart';
 import 'package:dart_backend/controllers/app_user_controller.dart';
-import 'model/author.dart';
-import 'model/post.dart';
+import 'model/note.dart';
+import 'model/category.dart';
 import 'model/user.dart';
 
 class AppService extends ApplicationChannel {
