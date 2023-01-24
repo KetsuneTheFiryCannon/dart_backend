@@ -1,4 +1,5 @@
 import 'package:conduit/conduit.dart';
+import 'package:dart_backend/model/note.dart';
 
 class User extends ManagedObject<_User> implements _User {}
 
@@ -22,4 +23,6 @@ class _User {
   String? accessToken;
   @Column(nullable: true)
   String? refreshToken;
+
+  ManagedSet<Note>? notesList;
 }
