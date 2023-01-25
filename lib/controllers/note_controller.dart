@@ -19,7 +19,6 @@ class NoteController extends ResourceController {
     try {
       final id = AppUtils.getIdFromHeader(header);
       final author = await managedContext.fetchObjectWithID<User>(id);
-
       if (author == null) {
         throw AppResponse.unauthorized(message: 'Невалидный токен');
       }
@@ -79,5 +78,41 @@ class NoteController extends ResourceController {
     } catch (e) {
       return AppResponse.serverError(e);
     }
+  }
+
+  @Operation.put('id')
+  Future<Response> updateNote(
+     @Bind.header(HttpHeaders.authorizationHeader) String header,
+      @Bind.path('id') int id,
+      @Bind.body() Note note) async {
+    try {
+      final authorId = AppUtils.getIdFromHeader(header);
+      final author = await managedContext.fetchObjectWithID<User>(authorId);
+      if (author == null) {
+        throw AppResponse.unauthorized(message: 'Невалидный токен');
+      }
+
+      final qGetNote = Query<Note>(managedContext)
+        ..where((x) => x.id).equalTo(id)
+        ..join(object: (x) => x.author)
+        ..join(object: (x) => x.category);
+      var found = await qGetNote.fetchOne();
+      if (found == null) {
+        return Response.notFound(
+            body: ModelResponse(message: 'Не найдено заметок'));
+      }
+
+      final qUpdateNote = Query<Note>(managedContext)
+        ..where((x) => x.id).equalTo(id)
+        ..values.content = note.content
+        ..values.name = note.name
+        ..values.category!.id = note.category!.id
+        ..values.editedDate = DateTime.now();
+      found = await qUpdateNote.updateOne();
+
+      return AppResponse.ok(/*body: found, */message: 'Заметка успешно обновлена');
+    } catch (e) {
+      return AppResponse.serverError(e);
+    }    
   }
 }
