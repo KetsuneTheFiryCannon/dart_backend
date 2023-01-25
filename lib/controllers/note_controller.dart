@@ -28,7 +28,7 @@ class NoteController extends ResourceController {
         ..values.author!.id = id
         ..values.content = note.content
         ..values.name = note.name
-        ..values.category = note.category;
+        ..values.category!.id = note.category!.id;
       await qCreateNote.insert();
 
       return AppResponse.ok(message: 'Заметка успешно добавлена');
@@ -43,15 +43,17 @@ class NoteController extends ResourceController {
     try {
       final id = AppUtils.getIdFromHeader(header);
       final qGetNotes = Query<Note>(managedContext)
-        ..where((x) => x.author!.id).equalTo(id);
+        ..where((x) => x.author!.id).equalTo(id)
+        ..join(object: (x) => x.author)
+        ..join(object: (x) => x.category);
       final List<Note> notes = await qGetNotes.fetch();
       if (notes.isEmpty) {
         return Response.notFound(
             body: ModelResponse(data: [], message: 'Не найдено заметок'));
       }
-      return AppResponse.ok(body: notes);
-    } on QueryException catch (e) {
-      return AppResponse.serverError(e, message: e.message);
+      return Response.ok(notes);
+    } catch (e) {
+      return AppResponse.serverError(e);
     }
   }
 
@@ -63,7 +65,9 @@ class NoteController extends ResourceController {
       final authorId = AppUtils.getIdFromHeader(header);
       final qGetNote = Query<Note>(managedContext)
         ..where((x) => x.author!.id).equalTo(authorId)
-        ..where((x) => x.id).equalTo(id);
+        ..where((x) => x.id).equalTo(id)
+        ..join(object: (x) => x.author)
+        ..join(object: (x) => x.category);
 
       final note = await qGetNote.fetchOne();
       if (note == null) {
@@ -71,9 +75,9 @@ class NoteController extends ResourceController {
             body: ModelResponse(message: 'Не найдено заметок'));
       }
 
-      return AppResponse.ok(body: note);
-    } on QueryException catch (e) {
-      return AppResponse.serverError(e, message: e.message);
+      return Response.ok(note);
+    } catch (e) {
+      return AppResponse.serverError(e);
     }
   }
 }
