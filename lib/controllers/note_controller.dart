@@ -32,7 +32,7 @@ class NoteController extends ResourceController {
       await qCreateNote.insert();
 
       return AppResponse.ok(message: 'Заметка успешно добавлена');
-    } catch (e) {
+  } on QueryException catch (e) {
       return AppResponse.serverError(e, message: 'Ошибка создания поста');
     }
   }
