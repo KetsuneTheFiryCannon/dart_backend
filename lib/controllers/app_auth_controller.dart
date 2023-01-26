@@ -87,19 +87,15 @@ class AppAuthController extends ResourceController {
   Future<Response> refreshToken(
       @Bind.path('refresh') String refreshToken) async {
     try {
-      // Получаем id пользователя из jwt-токена
       final id = AppUtils.getIdFromToken(refreshToken);
-
-      // Получаем данные пользователя по id
       final user = await managedContext.fetchObjectWithID<User>(id);
 
       if (user!.refreshToken != refreshToken) {
         return AppResponse.unauthorized(message: 'Токен невалидный');
       }
 
-      _updateTokens(id, managedContext);
-      return AppResponse.ok(
-          body: user.backing.contents, message: 'Токен успешно обновлен');
+      final refreshed = _updateTokens(id, managedContext);
+      return AppResponse.ok(body: refreshed, message: 'Токен успешно обновлен');
     } on QueryException catch (e) {
       return AppResponse.serverError(e, message: e.message);
     }
@@ -114,7 +110,7 @@ class AppAuthController extends ResourceController {
     return qFindUser.fetchOne();
   }
 
-  void _updateTokens(int id, ManagedContext transaction) async {
+  Future<User?> _updateTokens(int id, ManagedContext transaction) async {
     final Map<String, String> tokens = _getTokens(id);
 
     final qUpdateTokens = Query<User>(transaction)
@@ -122,7 +118,7 @@ class AppAuthController extends ResourceController {
       ..values.accessToken = tokens['access']
       ..values.refreshToken = tokens['refresh'];
 
-    await qUpdateTokens.updateOne();
+    return await qUpdateTokens.updateOne();
   }
 
   Map<String, String> _getTokens(int id) {
