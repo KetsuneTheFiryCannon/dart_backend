@@ -9,6 +9,9 @@ class AppResponse extends Response {
   AppResponse.unauthorized({dynamic body, String? message})
       : super.unauthorized(body: ModelResponse(data: body, message: message));
 
+  AppResponse.forbidden({dynamic data, String? message})
+      : super.forbidden(body: ModelResponse(data: data, message: message));
+
   AppResponse.badRequest({dynamic body, String? message})
       : super.badRequest(body: ModelResponse(data: body, message: message));
 
