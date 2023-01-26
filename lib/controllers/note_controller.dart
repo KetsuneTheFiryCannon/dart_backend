@@ -27,10 +27,11 @@ class NoteController extends ResourceController {
         ..values.content = note.content
         ..values.name = note.name
         ..values.category!.id = note.category!.id;
-      await qCreateNote.insert();
+      final newNote = await qCreateNote.insert();
+      newNote.removePropertyFromBackingMap('author');
 
-      return AppResponse.ok(message: 'Заметка успешно добавлена');
-  } on QueryException catch (e) {
+      return AppResponse.ok(body: newNote, message: 'Заметка добавлена');
+    } on QueryException catch (e) {
       return AppResponse.serverError(e, message: 'Ошибка создания поста');
     }
   }
@@ -46,10 +47,15 @@ class NoteController extends ResourceController {
         ..join(object: (x) => x.category);
       final List<Note> notes = await qGetNotes.fetch();
       if (notes.isEmpty) {
-        return Response.notFound(
-            body: ModelResponse(data: [], message: 'Не найдено заметок'));
+        return AppResponse.notFound(data: [], message: 'Не найдено заметок');
       }
-      return Response.ok(notes);
+
+      for (var note in notes) {
+        note.removePropertyFromBackingMap('author');
+      }
+
+      return AppResponse.ok(
+          body: notes, message: 'Записки авторизованного пользователя');
     } catch (e) {
       return AppResponse.serverError(e);
     }
@@ -64,16 +70,16 @@ class NoteController extends ResourceController {
       final qGetNote = Query<Note>(managedContext)
         ..where((x) => x.author!.id).equalTo(authorId)
         ..where((x) => x.id).equalTo(id)
-        ..join(object: (x) => x.author)
         ..join(object: (x) => x.category);
 
       final note = await qGetNote.fetchOne();
       if (note == null) {
-        return Response.notFound(
-            body: ModelResponse(message: 'Не найдено заметок'));
+        return AppResponse.notFound(message: 'Не найдено заметок');
       }
+      note.removePropertyFromBackingMap('author');
 
-      return Response.ok(note);
+      var response = AppResponse.ok(body: note, message: 'Найдена заметка');
+      return response;
     } catch (e) {
       return AppResponse.serverError(e);
     }
@@ -81,7 +87,7 @@ class NoteController extends ResourceController {
 
   @Operation.put('id')
   Future<Response> updateNote(
-     @Bind.header(HttpHeaders.authorizationHeader) String header,
+      @Bind.header(HttpHeaders.authorizationHeader) String header,
       @Bind.path('id') int id,
       @Bind.body() Note note) async {
     try {
@@ -97,8 +103,7 @@ class NoteController extends ResourceController {
         ..join(object: (x) => x.category);
       var found = await qGetNote.fetchOne();
       if (found == null) {
-        return Response.notFound(
-            body: ModelResponse(message: 'Не найдено заметок'));
+        return AppResponse.notFound(message: 'Не найдено заметок');
       }
 
       final qUpdateNote = Query<Note>(managedContext)
@@ -109,9 +114,9 @@ class NoteController extends ResourceController {
         ..values.editedDate = DateTime.now();
       found = await qUpdateNote.updateOne();
 
-      return AppResponse.ok(/*body: found, */message: 'Заметка успешно обновлена');
+      return AppResponse.ok(body: found, message: 'Заметка успешно обновлена');
     } catch (e) {
       return AppResponse.serverError(e);
-    }    
+    }
   }
 }
