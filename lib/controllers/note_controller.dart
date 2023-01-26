@@ -119,4 +119,36 @@ class NoteController extends ResourceController {
       return AppResponse.serverError(e);
     }
   }
+
+  @Operation.delete('id')
+  Future<Response> deleteNote(
+      @Bind.header(HttpHeaders.authorizationHeader) String header,
+      @Bind.path('id') int id) async {
+    try {
+      final authorId = AppUtils.getIdFromHeader(header);
+      final author = await managedContext.fetchObjectWithID<User>(authorId);
+      if (author == null) {
+        throw AppResponse.unauthorized(message: 'Невалидный токен');
+      }
+
+      final note = await managedContext.fetchObjectWithID<Note>(id);
+      if (note == null) {
+        return AppResponse.notFound(message: 'Не найдено записок');
+      }
+
+      if (note.author!.id != authorId) {
+        final data = {'author': note.author!.id, 'user': authorId};
+        return AppResponse.forbidden(
+            data: data, message: 'Пользователь не является автором записки');
+      }
+
+      final qDeleteNote = Query<Note>(managedContext)
+        ..where((x) => x.id).equalTo(id);
+      await qDeleteNote.delete();
+
+      return AppResponse.ok(message: 'Записка была успешно удалена');
+    } catch (e) {
+      return AppResponse.serverError(e, message: 'Ошибка удаления заметки');
+    }
+  }
 }
