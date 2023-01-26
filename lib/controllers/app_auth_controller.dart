@@ -94,7 +94,7 @@ class AppAuthController extends ResourceController {
         return AppResponse.unauthorized(message: 'Токен невалидный');
       }
 
-      final refreshed = _updateTokens(id, managedContext);
+      final refreshed = await _updateTokens(id, managedContext);
       return AppResponse.ok(body: refreshed, message: 'Токен успешно обновлен');
     } on QueryException catch (e) {
       return AppResponse.serverError(e, message: e.message);
