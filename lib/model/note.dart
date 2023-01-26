@@ -2,7 +2,9 @@ import 'package:conduit/conduit.dart';
 import 'package:dart_backend/model/category.dart';
 import 'package:dart_backend/model/user.dart';
 
-class Note extends ManagedObject<_Note> implements _Note {}
+class Note extends ManagedObject<_Note> implements _Note {
+  Map<String, dynamic> toJson() => asMap();
+}
 
 @Table(name: 'notes')
 class _Note {
@@ -13,9 +15,9 @@ class _Note {
   @Column()
   String? content;
 
-  @Column(defaultValue: 'now()', omitByDefault: true)
+  @Column(defaultValue: 'now()')
   DateTime? createdDate;
-  @Column(nullable: true, omitByDefault: true)
+  @Column(nullable: true)
   DateTime? editedDate;
 
   @Relate(#notesList, isRequired: true, onDelete: DeleteRule.cascade)
