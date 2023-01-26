@@ -38,10 +38,14 @@ class NoteController extends ResourceController {
 
   @Operation.get()
   Future<Response> getAllUserNotes(
-      @Bind.header(HttpHeaders.authorizationHeader) String header) async {
+      @Bind.header(HttpHeaders.authorizationHeader) String header,
+      {@Bind.query('pageLimit') int pageLimit = 0,
+      @Bind.query('skipRows') int skipRows = 0}) async {
     try {
       final id = AppUtils.getIdFromHeader(header);
       final qGetNotes = Query<Note>(managedContext)
+        ..fetchLimit = pageLimit
+        ..offset = pageLimit * skipRows
         ..where((x) => x.author!.id).equalTo(id)
         ..join(object: (x) => x.author)
         ..join(object: (x) => x.category);
