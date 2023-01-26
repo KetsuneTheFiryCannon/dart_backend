@@ -17,8 +17,7 @@ class AppUserController extends ResourceController {
       final id = AppUtils.getIdFromHeader(header);
       final user = await managedContext.fetchObjectWithID<User>(id);
       user!.removePropertiesFromBackingMap(['refreshToken', 'accessToken']);
-      return AppResponse.ok(
-          message: 'Успешное получения профиля', body: user.backing.contents);
+      return AppResponse.ok(body: user, message: 'Успешное получения профиля');
     } catch (e) {
       return AppResponse.serverError(e,
           message: 'Ошибка получения профиля пользователя');
@@ -44,8 +43,7 @@ class AppUserController extends ResourceController {
       found = await managedContext.fetchObjectWithID<User>(id);
       found!.removePropertiesFromBackingMap(['accessToken', 'refreshToken']);
 
-      return AppResponse.ok(
-          body: found.backing.contents, message: 'Успешное обновление профиля');
+      return AppResponse.ok(body: found, message: 'Профиль обновлен');
     } catch (e) {
       return AppResponse.serverError(e, message: 'Ошибка обновления данных');
     }
@@ -66,8 +64,7 @@ class AppUserController extends ResourceController {
       final oldHashPassword =
           generatePasswordHash(oldPassword, found!.salt ?? '');
       if (oldHashPassword != found.hashPassword) {
-        return Response.badRequest(
-            body: ModelResponse(message: 'Неверный старый пароль'));
+        return AppResponse.badRequest(message: 'Неверный старый пароль');
       }
 
       final newHashPassword =
@@ -78,7 +75,7 @@ class AppUserController extends ResourceController {
         ..values.hashPassword = newHashPassword;
       await qUpdatePassword.updateOne();
 
-      return AppResponse.ok(body: 'Пароль успешно обновлен');
+      return AppResponse.ok(message: 'Пароль успешно обновлен');
     } catch (e) {
       return AppResponse.serverError(e, message: 'Ошибка обновления пароля');
     }
