@@ -1,5 +1,5 @@
 import 'package:conduit/conduit.dart';
-import 'package:dart_backend/response.dart';
+import 'package:dart_backend/model_response.dart';
 import 'package:jaguar_jwt/jaguar_jwt.dart';
 
 class AppResponse extends Response {
@@ -11,6 +11,9 @@ class AppResponse extends Response {
 
   AppResponse.badRequest({dynamic body, String? message})
       : super.badRequest(body: ModelResponse(data: body, message: message));
+
+  AppResponse.notFound({dynamic data, String? message})
+      : super.notFound(body: ModelResponse(data: data, message: message));
 
   AppResponse.ok({dynamic body, String? message})
       : super.ok(ModelResponse(data: body, message: message));
