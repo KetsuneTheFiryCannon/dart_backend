@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:conduit/conduit.dart';
 import 'package:dart_backend/model/user.dart';
-import 'package:dart_backend/response.dart';
 import 'package:dart_backend/utils/app_response.dart';
 import 'package:dart_backend/utils/app_utils.dart';
 
