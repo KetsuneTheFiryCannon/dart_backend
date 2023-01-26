@@ -1,7 +1,9 @@
 import 'package:conduit/conduit.dart';
 import 'package:dart_backend/model/note.dart';
 
-class User extends ManagedObject<_User> implements _User {}
+class User extends ManagedObject<_User> implements _User {
+  Map<String, dynamic> toJson() => asMap();
+}
 
 @Table(name: 'users')
 class _User {
