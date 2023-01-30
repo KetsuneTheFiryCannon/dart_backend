@@ -1,5 +1,5 @@
 username: "postgres"
-password: "L@7LTiM+`8kO~$WY"
+password: "2358"
 host: "localhost"
 port: 5432
-databaseName: "dart-api"
+databaseName: "flutter-note-project"

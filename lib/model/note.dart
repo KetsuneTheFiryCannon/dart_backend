@@ -12,8 +12,10 @@ class _Note {
   int? id;
   @Column(unique: true, indexed: true)
   String? name;
+  String? number;
   @Column()
   String? content;
+  double? summ;
 
   @Column(defaultValue: 'now()')
   DateTime? createdDate;

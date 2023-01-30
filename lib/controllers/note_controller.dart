@@ -26,6 +26,8 @@ class NoteController extends ResourceController {
         ..values.author!.id = id
         ..values.content = note.content
         ..values.name = note.name
+        ..values.number = note.number
+        ..values.summ = note.summ
         ..values.category!.id = note.category!.id;
       final newNote = await qCreateNote.insert();
       newNote.removePropertyFromBackingMap('author');
